@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  post-db:
+    image: postgres:14
+    container_name: post-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: postdb
+    ports:
+      - "5432:5432"
+    networks:
+      - mynetwork
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d postdb -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+
+  backend-infra:
+    build: ../backend-infra
+    container_name: backend-infra
+    ports:
+      - "8000:8000"
+    depends_on:
+      post-db:
+        condition: service_healthy
+    networks:
+      - mynetwork
+    volumes:
+      - ../backend-infra:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+networks:
+  mynetwork:
+
+volumes:
+  postgres_data:
