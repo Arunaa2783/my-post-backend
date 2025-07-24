@@ -6,12 +6,11 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# PostgreSQL connection URL
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:rootroot@localhost:5432/postdb"
+# Use environment variable for DB URL
+SQLALCHEMY_DATABASE_URL = os.environ["DATABASE_URL"]
 
 # Retry until the database is available
 MAX_RETRIES = 10
@@ -31,11 +30,7 @@ else:
 
 # Create the engine
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
-
-# Create a session local class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base class for models
 Base = declarative_base()
 
 class Post(Base):
