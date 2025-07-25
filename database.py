@@ -9,8 +9,13 @@ from sqlalchemy.orm import sessionmaker
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Use environment variable for DB URL
-SQLALCHEMY_DATABASE_URL = os.environ["DATABASE_URL"]
+# Use environment variable for DB URL (safe way)
+SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL")
+if not SQLALCHEMY_DATABASE_URL:
+    logger.error("DATABASE_URL environment variable is not set!")
+    raise RuntimeError("DATABASE_URL environment variable is required")
+
+logger.info(f"DATABASE_URL found: {SQLALCHEMY_DATABASE_URL}")
 
 # Retry until the database is available
 MAX_RETRIES = 10
